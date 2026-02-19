@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { EmailCodeFactor, TOTPFactor } from '@clerk/types';
 import { Input } from '@/components/ui/input';
-import { Button, buttonTextVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Logo } from '@/components/brand/Logo';
 
@@ -93,9 +93,7 @@ export default function SignInScreen() {
       console.debug('==> SIGN_IN_ERROR:', JSON.stringify(err, null, 2));
 
       if (err?.errors && Array.isArray(err.errors)) {
-        const clerkErrors = err.errors.map(
-          (e: any) => e.longMessage || e.message
-        );
+        const clerkErrors = err.errors.map((e: any) => e.longMessage || e.message);
         setErrors(clerkErrors);
       } else if (err?.message) {
         setErrors([err.message]);
@@ -135,9 +133,7 @@ export default function SignInScreen() {
       console.error(JSON.stringify(err, null, 2));
 
       if (err?.errors && Array.isArray(err.errors)) {
-        const clerkErrors = err.errors.map(
-          (e: any) => e.longMessage || e.message
-        );
+        const clerkErrors = err.errors.map((e: any) => e.longMessage || e.message);
         setErrors(clerkErrors);
       } else if (err?.message) {
         setErrors([err.message]);
@@ -164,9 +160,7 @@ export default function SignInScreen() {
       console.error(JSON.stringify(err, null, 2));
 
       if (err?.errors && Array.isArray(err.errors)) {
-        const clerkErrors = err.errors.map(
-          (e: any) => e.longMessage || e.message
-        );
+        const clerkErrors = err.errors.map((e: any) => e.longMessage || e.message);
         setErrors(clerkErrors);
       } else {
         setErrors(['Failed to resend code']);
@@ -186,9 +180,11 @@ export default function SignInScreen() {
 
   if (needsSecondFactor) {
     return (
-      <View className="flex-1 justify-center px-8 bg-background">
-        <View className="gap-4 p-8 rounded-2xl bg-card shadow-lg">
-          <Text variant="h4" className="text-center">Two-Factor Authentication</Text>
+      <View className="bg-background flex-1 justify-center px-8">
+        <View className="bg-card gap-4 rounded-2xl p-8 shadow-lg">
+          <Text variant="h4" className="text-center">
+            Two-Factor Authentication
+          </Text>
           <Text variant="muted" className="text-center">
             {secondFactorStrategy === 'email_code'
               ? 'Enter the code sent to your email'
@@ -198,7 +194,7 @@ export default function SignInScreen() {
           {errors.length > 0 && (
             <View className="gap-1">
               {errors.map((error, index) => (
-                <Text key={index} className="text-destructive text-sm text-center">
+                <Text key={index} className="text-destructive text-center text-sm">
                   {error}
                 </Text>
               ))}
@@ -239,18 +235,20 @@ export default function SignInScreen() {
   }
 
   return (
-    <View className="flex-1 justify-center px-8 bg-background">
-      <View className="gap-4 p-8 rounded-2xl bg-card shadow-lg">
+    <View className="bg-background flex-1 justify-center px-8">
+      <View className="gap-4">
         <View className="items-center pb-4">
           <Logo />
         </View>
 
-        <Text variant="h4" className="text-center">Sign In</Text>
+        <Text variant="h4" className="text-center">
+          Sign In
+        </Text>
 
         {errors.length > 0 && (
           <View className="gap-1">
             {errors.map((error, index) => (
-              <Text key={index} className="text-destructive text-sm text-center">
+              <Text key={index} className="text-destructive text-center text-sm">
                 {error}
               </Text>
             ))}
@@ -305,13 +303,16 @@ export default function SignInScreen() {
           )}
         </Button>
 
-        <View className="flex-row items-center justify-center gap-2 pt-2">
-          <Text className="text-muted-foreground text-sm">Don't have an account?</Text>
-          <Link href="/sign-up" asChild>
-            <Button variant="ghost" size="sm" disabled={isLoading}>
-              <Text className={buttonTextVariants({ variant: 'ghost' })}>
-                Sign Up
-              </Text>
+        <View className="flex-row items-center justify-center gap-4 pt-4">
+          <Link href="/(auth)/terms" asChild>
+            <Button variant="link" size="sm" disabled={isLoading}>
+              <Text className="text-muted-foreground text-xs">Terms of Service</Text>
+            </Button>
+          </Link>
+          <Text className="text-muted-foreground text-xs">|</Text>
+          <Link href="/(auth)/privacy" asChild>
+            <Button variant="link" size="sm" disabled={isLoading}>
+              <Text className="text-muted-foreground text-xs">Privacy Policy</Text>
             </Button>
           </Link>
         </View>
