@@ -8,6 +8,9 @@ import {
   Cat,
   BookOpen,
   Video,
+  School,
+  Gamepad2,
+  Film,
   type LucideIcon,
 } from 'lucide-react-native';
 
@@ -22,6 +25,9 @@ const iconMap: Record<string, LucideIcon> = {
   Cat,
   BookOpen,
   Video,
+  School,
+  Gamepad2,
+  Film,
 };
 
 /**
@@ -35,7 +41,7 @@ export function getIconByName(iconName: string | undefined): LucideIcon {
 }
 
 /**
- * Default colors for the 8 predefined categories
+ * Default colors for the predefined categories
  */
 export const defaultCategoryColors = {
   Learning: '#3b82f6', // blue
@@ -46,6 +52,9 @@ export const defaultCategoryColors = {
   Sports: '#ef4444', // red
   Animals: '#14b8a6', // teal
   Stories: '#f97316', // orange
+  School: '#14d97d', // mint
+  Gaming: '#ed3a3aff', // red
+  Movies: '#ec4899', // pink
 };
 
 /**
