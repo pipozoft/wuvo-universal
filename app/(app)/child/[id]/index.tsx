@@ -8,13 +8,15 @@ import {
   ActivityIndicator,
   SafeAreaView,
   useWindowDimensions,
+  Image,
 } from 'react-native';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, User } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
 import { getIconByName, getCategoryColor, isCustomCategory } from '@/lib/category-icons';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { getAvatarAsset } from '@/lib/avatar';
 
 export default function ChildCategoriesScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -48,6 +50,9 @@ export default function ChildCategoriesScreen() {
     );
   }
 
+  const avatarAsset = getAvatarAsset(child.avatar);
+  const avatarSize = 40;
+
   const renderCategory = ({ item }: { item: any }) => {
     const IconComponent = getIconByName(item.icon);
     const color = getCategoryColor(item);
@@ -56,7 +61,7 @@ export default function ChildCategoriesScreen() {
     return (
       <TouchableOpacity
         className={cn(
-          'mx-2 flex-1 items-center justify-center rounded-2xl bg-[#1a1a1a] gap-3',
+          'mx-2 flex-1 items-center justify-center gap-3 rounded-2xl bg-[#1a1a1a]',
           isLandscape ? 'aspect-[1.5] p-4' : 'aspect-[1.2] p-5'
         )}
         style={{ borderColor: color, borderWidth: 2 }}
@@ -68,7 +73,7 @@ export default function ChildCategoriesScreen() {
           color={color}
           className={cn(isLandscape ? 'mb-2' : 'mb-3')}
         />
-        <Text className="text-center text-md font-semibold text-white">{item.title}</Text>
+        <Text className="text-md text-center font-semibold text-white">{item.title}</Text>
         {isCustom && <Text className="mt-1 text-xs text-[#6b7280]">Custom</Text>}
       </TouchableOpacity>
     );
@@ -80,7 +85,26 @@ export default function ChildCategoriesScreen() {
         <TouchableOpacity className="p-2" onPress={handleBack}>
           <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-white">{child.name}'s Shows</Text>
+        <View className="flex-row items-center gap-3">
+          <View
+            className="items-center justify-center overflow-hidden bg-[#2a2a2a]"
+            style={{
+              width: avatarSize,
+              height: avatarSize,
+              borderRadius: avatarSize / 2,
+            }}>
+            {avatarAsset ? (
+              <Image
+                source={avatarAsset}
+                style={{ width: avatarSize, height: avatarSize }}
+                resizeMode="contain"
+              />
+            ) : (
+              <User size={avatarSize * 0.5} color="#999999" />
+            )}
+          </View>
+          <Text className="text-xl font-bold text-white">{child.name}'s Shows</Text>
+        </View>
         <View className="w-10" />
       </View>
 

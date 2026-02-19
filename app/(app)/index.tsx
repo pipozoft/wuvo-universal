@@ -15,31 +15,8 @@ import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/brand/Logo';
-
-const AVATAR_COLORS = [
-  '#ff754f',
-  '#d800b2',
-  '#ff007a',
-  '#ffbd43',
-  '#00c394',
-  '#009ffc',
-  '#00b2cc',
-  '#0066ff',
-];
-
-const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-};
-
-const getAvatarColor = (name: string) => {
-  const index = name.charCodeAt(0) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[index];
-};
+import { User } from 'lucide-react-native';
+import { getAvatarAsset } from '@/lib/avatar';
 
 export default function ProfileSelectionScreen() {
   const { user } = useUser();
@@ -71,9 +48,9 @@ export default function ProfileSelectionScreen() {
 
   const renderProfile = ({ item }: { item: any }) => {
     const isSelected = selectedChild === item._id;
-    const avatarColor = getAvatarColor(item.name);
     const avatarSize = isLandscape ? 80 : 100;
     const cardWidth = isLandscape ? 120 : 140;
+    const avatarAsset = getAvatarAsset(item.avatar);
 
     return (
       <TouchableOpacity
@@ -85,26 +62,26 @@ export default function ProfileSelectionScreen() {
         onPress={() => handleProfilePress(item._id)}
         activeOpacity={0.7}>
         <View
-          className="mb-3 items-center justify-center"
+          className="mb-3 items-center justify-center overflow-hidden"
           style={{
-            backgroundColor: avatarColor,
             width: avatarSize,
             height: avatarSize,
             borderRadius: avatarSize / 2,
+            backgroundColor: avatarAsset ? 'transparent' : '#2a2a2a',
+            borderWidth: 3,
+            borderColor: avatarAsset ? '#322DE2' : '#444444',
           }}>
-          {item.avatar ? (
+          {avatarAsset ? (
             <Image
-              source={{ uri: item.avatar }}
+              source={avatarAsset}
               style={{
                 width: avatarSize,
                 height: avatarSize,
-                borderRadius: avatarSize / 2,
               }}
+              resizeMode="contain"
             />
           ) : (
-            <Text className={cn('font-bold text-white', isLandscape ? 'text-[28px]' : 'text-4xl')}>
-              {getInitials(item.name)}
-            </Text>
+            <User size={avatarSize * 0.5} color="#999999" />
           )}
         </View>
         <Text className="text-center text-base font-semibold text-white">{item.name}</Text>
@@ -117,7 +94,10 @@ export default function ProfileSelectionScreen() {
       <View className={cn('items-center', isLandscape ? 'mt-5 mb-5' : 'mt-14 mb-10')}>
         <Logo height={isLandscape ? 40 : 50} />
         <Text
-          className={cn('mb-2 font-bold text-white', isLandscape ? 'text-[24px] mt-4' : 'text-[32px] mt-8')}>
+          className={cn(
+            'mb-2 font-bold text-white',
+            isLandscape ? 'mt-4 text-[24px]' : 'mt-8 text-[32px]'
+          )}>
           Who's watching?
         </Text>
       </View>

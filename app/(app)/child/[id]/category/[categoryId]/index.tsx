@@ -12,10 +12,11 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Play } from 'lucide-react-native';
+import { ArrowLeft, Play, User } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
 import { getIconByName, getCategoryColor } from '@/lib/category-icons';
 import { Icon } from '@/components/ui/icon';
+import { getAvatarAsset } from '@/lib/avatar';
 
 export default function CategoryVideosScreen() {
   const { id, categoryId } = useLocalSearchParams<{ id: string; categoryId: string }>();
@@ -56,6 +57,8 @@ export default function CategoryVideosScreen() {
 
   const CategoryIcon = getIconByName(category.icon);
   const categoryColor = getCategoryColor(category);
+  const avatarAsset = child ? getAvatarAsset(child.avatar) : null;
+  const avatarSize = 28;
 
   const renderVideo = ({ item }: { item: any }) => {
     return (
@@ -95,7 +98,24 @@ export default function CategoryVideosScreen() {
             <Icon as={CategoryIcon} size={20} color={categoryColor} />
             <Text className="text-sm font-bold text-white">{category.title}</Text>
           </View>
-          <Text className="mt-0.5 text-sm text-[#999999]">{child?.name}'s Videos</Text>
+          <View className="mt-1 flex-row items-center gap-2">
+            {avatarAsset && (
+              <View
+                className="items-center justify-center overflow-hidden bg-[#2a2a2a]"
+                style={{
+                  width: avatarSize,
+                  height: avatarSize,
+                  borderRadius: avatarSize / 2,
+                }}>
+                <Image
+                  source={avatarAsset}
+                  style={{ width: avatarSize, height: avatarSize }}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
+            <Text className="text-sm text-[#999999]">{child?.name}'s Videos</Text>
+          </View>
         </View>
         <View className="w-10" />
       </View>
