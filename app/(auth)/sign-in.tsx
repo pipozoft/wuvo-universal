@@ -201,10 +201,9 @@ export default function SignInScreen() {
             minHeight: Dimensions.get('window').height - 100,
           }}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          className="bg-background">
-          <View className="px-8 py-8">
-            <View className="bg-card gap-4 rounded-2xl p-8 shadow-lg">
+          showsVerticalScrollIndicator={false}>
+          <View className="py-8">
+            <View className="gap-4 rounded-2xl p-8 shadow-lg">
               <Text variant="h4" className="text-center">
                 Two-Factor Authentication
               </Text>

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   useWindowDimensions,
   Image,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
@@ -35,15 +36,17 @@ export default function ChildCategoriesScreen() {
 
   if (child === undefined || categories === undefined) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-[#0f0f0f]">
-        <ActivityIndicator size="large" color="#322DE2" />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingState}>
+          <ActivityIndicator size="large" color="#322DE2" />
+        </View>
       </SafeAreaView>
     );
   }
 
   if (!child) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-[#0f0f0f]">
+      <SafeAreaView style={styles.container}>
         <Text className="mb-5 text-lg text-white">Profile not found</Text>
         <Button onPress={handleBack}>Go Back</Button>
       </SafeAreaView>
@@ -74,14 +77,14 @@ export default function ChildCategoriesScreen() {
           className={cn(isLandscape ? 'mb-2' : 'mb-3')}
         />
         <Text className="text-md text-center font-semibold text-white">{item.title}</Text>
-        {isCustom && <Text className="mt-1 text-xs text-[#6b7280]">Custom</Text>}
+        {/* {isCustom && <Text className="mt-1 text-xs text-[#6b7280]">Custom</Text>} */}
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0f0f0f]">
-      <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-5 py-4">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity className="p-2" onPress={handleBack}>
           <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
@@ -109,10 +112,10 @@ export default function ChildCategoriesScreen() {
       </View>
 
       {categories.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-10">
+        <View style={styles.emptyState}>
           <Text className="mb-4 text-6xl leading-16">📺</Text>
           <Text className="mb-3 text-2xl font-bold text-white">No categories yet</Text>
-          <Text className="text-center text-base text-[#999999]">
+          <Text className="px-10 text-center text-base text-[#999999]">
             Ask your parent to add some video categories for you!
           </Text>
         </View>
@@ -130,8 +133,38 @@ export default function ChildCategoriesScreen() {
             justifyContent: 'space-between',
             marginBottom: isLandscape ? 12 : 16,
           }}
+          style={styles.list}
         />
       )}
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a1a1a',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  list: {
+    flex: 1,
+  },
+  loadingState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+});

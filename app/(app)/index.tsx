@@ -10,6 +10,7 @@ import {
   Image,
   ActivityIndicator,
   useWindowDimensions,
+  StyleSheet,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { Logo } from '@/components/brand/Logo';
 import { User } from 'lucide-react-native';
 import { getAvatarAsset } from '@/lib/avatar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileSelectionScreen() {
   const { user } = useUser();
@@ -40,9 +42,11 @@ export default function ProfileSelectionScreen() {
 
   if (children === undefined) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#0f0f0f] p-6">
-        <ActivityIndicator size="large" color="#322DE2" />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingState}>
+          <ActivityIndicator size="large" color="#322DE2" />
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -135,3 +139,14 @@ export default function ProfileSelectionScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loadingState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

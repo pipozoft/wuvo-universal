@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Image,
   useWindowDimensions,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
@@ -26,8 +27,8 @@ export default function CategoryVideosScreen() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  const numColumns = isLandscape ? 4 : 2;
-  const videoWidth = (width - 16 * (numColumns + 1)) / numColumns;
+  const numColumns = isLandscape ? 3 : 2;
+  const videoWidth = (width - (isLandscape ? 48 : 16) * (numColumns + 1)) / numColumns;
   const videoHeight = videoWidth * 0.75;
 
   const handleVideoPress = (videoId: string) => {
@@ -40,15 +41,17 @@ export default function CategoryVideosScreen() {
 
   if (child === undefined || category === undefined || videos === undefined) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-[#0f0f0f]">
-        <ActivityIndicator size="large" color="#322DE2" />
-      </SafeAreaView>
+      <SafeAreaView style={styles.container}>
+              <View style={styles.loadingState}>
+                <ActivityIndicator size="large" color="#322DE2" />
+              </View>
+            </SafeAreaView>
     );
   }
 
   if (!category) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-[#0f0f0f]">
+      <SafeAreaView style={styles.container}>
         <Text className="mb-5 text-lg text-white">Category not found</Text>
         <Button onPress={handleBack}>Go Back</Button>
       </SafeAreaView>
@@ -88,8 +91,8 @@ export default function CategoryVideosScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0f0f0f]">
-      <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-4 py-3">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity className="p-2" onPress={handleBack}>
           <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
@@ -121,10 +124,10 @@ export default function CategoryVideosScreen() {
       </View>
 
       {videos.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-10">
+        <View style={styles.emptyState}>
           <Text className="mb-4 text-6xl">🎬</Text>
           <Text className="mb-3 text-2xl font-bold text-white">No videos yet</Text>
-          <Text className="text-center text-base text-[#999999]">
+          <Text className="px-10 text-center text-base text-[#999999]">
             Ask your parent to add some videos to this category!
           </Text>
         </View>
@@ -141,9 +144,41 @@ export default function CategoryVideosScreen() {
           columnWrapperStyle={{
             justifyContent: 'space-between',
             marginBottom: isLandscape ? 12 : 16,
+            gap: isLandscape ? 12 : 16,
           }}
+          style={styles.list}
         />
       )}
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f0f0f',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a1a1a',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  list: {
+    flex: 1,
+  },
+  loadingState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
