@@ -1,6 +1,13 @@
 import { useSignIn } from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
-import { View, ActivityIndicator } from 'react-native';
+import {
+  View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -178,145 +185,178 @@ export default function SignInScreen() {
     setErrors([]);
   };
 
+  // iOS uses 'padding', Android works best with ScrollView only
+  const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : undefined;
+
   if (needsSecondFactor) {
     return (
-      <View className="bg-background flex-1 justify-center px-8">
-        <View className="bg-card gap-4 rounded-2xl p-8 shadow-lg">
-          <Text variant="h4" className="text-center">
-            Two-Factor Authentication
-          </Text>
-          <Text variant="muted" className="text-center">
-            {secondFactorStrategy === 'email_code'
-              ? 'Enter the code sent to your email'
-              : 'Enter the code from your authenticator app'}
-          </Text>
+      <KeyboardAvoidingView
+        behavior={keyboardBehavior}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            minHeight: Dimensions.get('window').height - 100,
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          className="bg-background">
+          <View className="px-8 py-8">
+            <View className="bg-card gap-4 rounded-2xl p-8 shadow-lg">
+              <Text variant="h4" className="text-center">
+                Two-Factor Authentication
+              </Text>
+              <Text variant="muted" className="text-center">
+                {secondFactorStrategy === 'email_code'
+                  ? 'Enter the code sent to your email'
+                  : 'Enter the code from your authenticator app'}
+              </Text>
 
-          {errors.length > 0 && (
-            <View className="gap-1">
-              {errors.map((error, index) => (
-                <Text key={index} className="text-destructive text-center text-sm">
-                  {error}
-                </Text>
-              ))}
+              {errors.length > 0 && (
+                <View className="gap-1">
+                  {errors.map((error, index) => (
+                    <Text key={index} className="text-destructive text-center text-sm">
+                      {error}
+                    </Text>
+                  ))}
+                </View>
+              )}
+
+              <Input
+                autoCapitalize="none"
+                autoCorrect={false}
+                value={code}
+                placeholder="Enter 6-digit code"
+                onChangeText={setCode}
+                keyboardType="number-pad"
+                maxLength={6}
+                editable={!isLoading}
+              />
+
+              <Button onPress={onSecondFactorPress} disabled={isLoading}>
+                {isLoading ? (
+                  <ActivityIndicator className="text-primary-foreground" />
+                ) : (
+                  <Text>Verify</Text>
+                )}
+              </Button>
+
+              {secondFactorStrategy === 'email_code' && (
+                <Button variant="ghost" onPress={resendSecondFactorCode} disabled={isLoading}>
+                  <Text>Resend Code</Text>
+                </Button>
+              )}
+
+              <Button variant="outline" onPress={resetSecondFactor} disabled={isLoading}>
+                <Text>Back to Sign In</Text>
+              </Button>
             </View>
-          )}
-
-          <Input
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={code}
-            placeholder="Enter 6-digit code"
-            onChangeText={setCode}
-            keyboardType="number-pad"
-            maxLength={6}
-            editable={!isLoading}
-          />
-
-          <Button onPress={onSecondFactorPress} disabled={isLoading}>
-            {isLoading ? (
-              <ActivityIndicator className="text-primary-foreground" />
-            ) : (
-              <Text>Verify</Text>
-            )}
-          </Button>
-
-          {secondFactorStrategy === 'email_code' && (
-            <Button variant="ghost" onPress={resendSecondFactorCode} disabled={isLoading}>
-              <Text>Resend Code</Text>
-            </Button>
-          )}
-
-          <Button variant="outline" onPress={resetSecondFactor} disabled={isLoading}>
-            <Text>Back to Sign In</Text>
-          </Button>
-        </View>
-      </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
   return (
-    <View className="bg-background flex-1 justify-center px-8">
-      <View className="gap-4">
-        <View className="items-center pb-4">
-          <Logo />
-        </View>
+    <KeyboardAvoidingView
+      behavior={keyboardBehavior}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          minHeight: Dimensions.get('window').height - 100,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        className="bg-background">
+        <View className="px-8 py-8">
+          <View className="gap-4">
+            <View className="items-center pb-4">
+              <Logo />
+            </View>
 
-        <Text variant="h4" className="text-center">
-          Sign In
-        </Text>
+            <Text variant="h4" className="text-center">
+              Sign In
+            </Text>
 
-        {errors.length > 0 && (
-          <View className="gap-1">
-            {errors.map((error, index) => (
-              <Text key={index} className="text-destructive text-center text-sm">
-                {error}
-              </Text>
-            ))}
+            {errors.length > 0 && (
+              <View className="gap-1">
+                {errors.map((error, index) => (
+                  <Text key={index} className="text-destructive text-center text-sm">
+                    {error}
+                  </Text>
+                ))}
+              </View>
+            )}
+
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value } }) => (
+                <View className="gap-1">
+                  <Input
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="email-address"
+                    value={value}
+                    placeholder="Email"
+                    onChangeText={onChange}
+                    editable={!isLoading}
+                  />
+                  {formErrors.email && (
+                    <Text className="text-destructive text-sm">{formErrors.email.message}</Text>
+                  )}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value } }) => (
+                <View className="gap-1">
+                  <Input
+                    value={value}
+                    placeholder="Password"
+                    secureTextEntry
+                    onChangeText={onChange}
+                    editable={!isLoading}
+                  />
+                  {formErrors.password && (
+                    <Text className="text-destructive text-sm">{formErrors.password.message}</Text>
+                  )}
+                </View>
+              )}
+            />
+
+            <Button onPress={handleSubmit(onSignInPress)} disabled={isLoading}>
+              {isLoading ? (
+                <ActivityIndicator className="text-primary-foreground" />
+              ) : (
+                <Text>Continue</Text>
+              )}
+            </Button>
+
+            <View className="flex-row items-center justify-center gap-4 pt-4">
+              <Link href="/(auth)/terms" asChild>
+                <Button variant="link" size="sm" disabled={isLoading}>
+                  <Text className="text-muted-foreground text-xs">Terms of Service</Text>
+                </Button>
+              </Link>
+              <Text className="text-muted-foreground text-xs">|</Text>
+              <Link href="/(auth)/privacy" asChild>
+                <Button variant="link" size="sm" disabled={isLoading}>
+                  <Text className="text-muted-foreground text-xs">Privacy Policy</Text>
+                </Button>
+              </Link>
+            </View>
           </View>
-        )}
-
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, value } }) => (
-            <View className="gap-1">
-              <Input
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="email-address"
-                value={value}
-                placeholder="Email"
-                onChangeText={onChange}
-                editable={!isLoading}
-              />
-              {formErrors.email && (
-                <Text className="text-destructive text-sm">{formErrors.email.message}</Text>
-              )}
-            </View>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, value } }) => (
-            <View className="gap-1">
-              <Input
-                value={value}
-                placeholder="Password"
-                secureTextEntry
-                onChangeText={onChange}
-                editable={!isLoading}
-              />
-              {formErrors.password && (
-                <Text className="text-destructive text-sm">{formErrors.password.message}</Text>
-              )}
-            </View>
-          )}
-        />
-
-        <Button onPress={handleSubmit(onSignInPress)} disabled={isLoading}>
-          {isLoading ? (
-            <ActivityIndicator className="text-primary-foreground" />
-          ) : (
-            <Text>Continue</Text>
-          )}
-        </Button>
-
-        <View className="flex-row items-center justify-center gap-4 pt-4">
-          <Link href="/(auth)/terms" asChild>
-            <Button variant="link" size="sm" disabled={isLoading}>
-              <Text className="text-muted-foreground text-xs">Terms of Service</Text>
-            </Button>
-          </Link>
-          <Text className="text-muted-foreground text-xs">|</Text>
-          <Link href="/(auth)/privacy" asChild>
-            <Button variant="link" size="sm" disabled={isLoading}>
-              <Text className="text-muted-foreground text-xs">Privacy Policy</Text>
-            </Button>
-          </Link>
         </View>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
