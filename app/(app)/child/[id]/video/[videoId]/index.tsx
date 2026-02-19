@@ -6,10 +6,10 @@ import {
   View,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView,
   StatusBar,
   useWindowDimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { ArrowLeft, X } from 'lucide-react-native';
 import { useState } from 'react';

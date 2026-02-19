@@ -6,10 +6,10 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView,
   useWindowDimensions,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
@@ -103,7 +103,7 @@ export default function ChildCategoriesScreen() {
               <User size={avatarSize * 0.5} color="#999999" />
             )}
           </View>
-          <Text className="text-xl font-bold text-white">{child.name}'s Shows</Text>
+          <Text className="text-xl font-bold text-white">{child.name}'s Library</Text>
         </View>
         <View className="w-10" />
       </View>
