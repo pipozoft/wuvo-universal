@@ -2,7 +2,6 @@ import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLocalSearchParams, router } from 'expo-router';
 import {
-  StyleSheet,
   Text,
   View,
   FlatList,
@@ -14,6 +13,9 @@ import {
 } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Play } from 'lucide-react-native';
+import { cn } from '@/lib/utils';
+import { getIconByName, getCategoryColor } from '@/lib/category-icons';
+import { Icon } from '@/components/ui/icon';
 
 export default function CategoryVideosScreen() {
   const { id, categoryId } = useLocalSearchParams<{ id: string; categoryId: string }>();
@@ -23,7 +25,6 @@ export default function CategoryVideosScreen() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  // Calculate video dimensions based on orientation
   const numColumns = isLandscape ? 4 : 2;
   const videoWidth = (width - 16 * (numColumns + 1)) / numColumns;
   const videoHeight = videoWidth * 0.75;
@@ -38,7 +39,7 @@ export default function CategoryVideosScreen() {
 
   if (child === undefined || category === undefined || videos === undefined) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
+      <SafeAreaView className="flex-1 items-center justify-center bg-[#0f0f0f]">
         <ActivityIndicator size="large" color="#322DE2" />
       </SafeAreaView>
     );
@@ -46,27 +47,37 @@ export default function CategoryVideosScreen() {
 
   if (!category) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Category not found</Text>
+      <SafeAreaView className="flex-1 items-center justify-center bg-[#0f0f0f]">
+        <Text className="mb-5 text-lg text-white">Category not found</Text>
         <Button onPress={handleBack}>Go Back</Button>
       </SafeAreaView>
     );
   }
 
+  const CategoryIcon = getIconByName(category.icon);
+  const categoryColor = getCategoryColor(category);
+
   const renderVideo = ({ item }: { item: any }) => {
     return (
       <TouchableOpacity
-        style={[styles.videoCard, { width: videoWidth }]}
+        className="active:opacity-70"
+        style={{ width: videoWidth }}
         onPress={() => handleVideoPress(item._id)}
-        activeOpacity={0.7}
-      >
-        <View style={[styles.thumbnailContainer, { width: videoWidth, height: videoHeight }]}>
-          <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
-          <View style={styles.playOverlay}>
+        activeOpacity={0.7}>
+        <View
+          className="relative overflow-hidden rounded-xl bg-[#1a1a1a]"
+          style={{ width: videoWidth, height: videoHeight }}>
+          <Image source={{ uri: item.thumbnail }} className="h-full w-full" />
+          <View className="absolute inset-0 items-center justify-center bg-black/40">
             <Play size={isLandscape ? 24 : 32} color="#ffffff" fill="#ffffff" />
           </View>
         </View>
-        <Text style={[styles.videoTitle, isLandscape && styles.videoTitleLandscape]} numberOfLines={2}>
+        <Text
+          className={cn(
+            'mt-2 font-medium text-white',
+            isLandscape ? 'mt-1.5 text-xs leading-4' : 'text-sm leading-5'
+          )}
+          numberOfLines={2}>
           {item.title}
         </Text>
       </TouchableOpacity>
@@ -74,23 +85,26 @@ export default function CategoryVideosScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+    <SafeAreaView className="flex-1 bg-[#0f0f0f]">
+      <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-4 py-3">
+        <TouchableOpacity className="p-2" onPress={handleBack}>
           <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>{category.title}</Text>
-          <Text style={styles.headerSubtitle}>{child?.name}'s Videos</Text>
+        <View className="flex-1 items-center">
+          <View className="flex-row items-center gap-2">
+            <Icon as={CategoryIcon} size={20} color={categoryColor} />
+            <Text className="text-sm font-bold text-white">{category.title}</Text>
+          </View>
+          <Text className="mt-0.5 text-sm text-[#999999]">{child?.name}'s Videos</Text>
         </View>
-        <View style={styles.placeholder} />
+        <View className="w-10" />
       </View>
 
       {videos.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyEmoji}>🎬</Text>
-          <Text style={styles.emptyTitle}>No videos yet</Text>
-          <Text style={styles.emptyText}>
+        <View className="flex-1 items-center justify-center px-10">
+          <Text className="mb-4 text-6xl">🎬</Text>
+          <Text className="mb-3 text-2xl font-bold text-white">No videos yet</Text>
+          <Text className="text-center text-base text-[#999999]">
             Ask your parent to add some videos to this category!
           </Text>
         </View>
@@ -101,125 +115,15 @@ export default function CategoryVideosScreen() {
           keyExtractor={(item) => item._id}
           numColumns={numColumns}
           key={isLandscape ? 'landscape' : 'portrait'}
-          contentContainerStyle={[
-            styles.videosList,
-            isLandscape && styles.videosListLandscape,
-          ]}
-          columnWrapperStyle={[
-            styles.videoRow,
-            isLandscape && styles.videoRowLandscape,
-          ]}
+          contentContainerStyle={{
+            padding: isLandscape ? 12 : 16,
+          }}
+          columnWrapperStyle={{
+            justifyContent: 'space-between',
+            marginBottom: isLandscape ? 12 : 16,
+          }}
         />
       )}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f0f0f',
-  },
-  centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1a1a1a',
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerCenter: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#999999',
-    marginTop: 2,
-  },
-  placeholder: {
-    width: 40,
-  },
-  videosList: {
-    padding: 16,
-  },
-  videosListLandscape: {
-    padding: 12,
-  },
-  videoRow: {
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  videoRowLandscape: {
-    marginBottom: 12,
-  },
-  videoCard: {},
-  thumbnailContainer: {
-    position: 'relative',
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#1a1a1a',
-  },
-  thumbnail: {
-    width: '100%',
-    height: '100%',
-  },
-  playOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  videoTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#ffffff',
-    marginTop: 8,
-    lineHeight: 20,
-  },
-  videoTitleLandscape: {
-    fontSize: 12,
-    marginTop: 6,
-    lineHeight: 16,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 12,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999999',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#ffffff',
-    marginBottom: 20,
-  },
-});

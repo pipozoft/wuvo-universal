@@ -2,8 +2,6 @@ import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLocalSearchParams, router } from 'expo-router';
 import {
-  StyleSheet,
-  Text,
   View,
   FlatList,
   TouchableOpacity,
@@ -13,19 +11,10 @@ import {
 } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react-native';
-
-const CATEGORY_ICONS: Record<string, string> = {
-  '🎵': '🎵',
-  '🎨': '🎨',
-  '🎮': '🎮',
-  '📚': '📚',
-  '🎬': '🎬',
-  '🎪': '🎪',
-  '🦁': '🦁',
-  '🚀': '🚀',
-  '🌈': '🌈',
-  '⭐': '⭐',
-};
+import { cn } from '@/lib/utils';
+import { getIconByName, getCategoryColor, isCustomCategory } from '@/lib/category-icons';
+import { Icon } from '@/components/ui/icon';
+import { Text } from '@/components/ui/text';
 
 export default function ChildCategoriesScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,7 +33,7 @@ export default function ChildCategoriesScreen() {
 
   if (child === undefined || categories === undefined) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
+      <SafeAreaView className="flex-1 items-center justify-center bg-[#0f0f0f]">
         <ActivityIndicator size="large" color="#322DE2" />
       </SafeAreaView>
     );
@@ -52,48 +41,54 @@ export default function ChildCategoriesScreen() {
 
   if (!child) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Profile not found</Text>
+      <SafeAreaView className="flex-1 items-center justify-center bg-[#0f0f0f]">
+        <Text className="mb-5 text-lg text-white">Profile not found</Text>
         <Button onPress={handleBack}>Go Back</Button>
       </SafeAreaView>
     );
   }
 
   const renderCategory = ({ item }: { item: any }) => {
-    const icon = item.icon || '⭐';
+    const IconComponent = getIconByName(item.icon);
+    const color = getCategoryColor(item);
+    const isCustom = isCustomCategory(item);
 
     return (
       <TouchableOpacity
-        style={[
-          styles.categoryCard,
-          isLandscape && styles.categoryCardLandscape,
-        ]}
+        className={cn(
+          'mx-2 flex-1 items-center justify-center rounded-2xl bg-[#1a1a1a] gap-3',
+          isLandscape ? 'aspect-[1.5] p-4' : 'aspect-[1.2] p-5'
+        )}
+        style={{ borderColor: color, borderWidth: 2 }}
         onPress={() => handleCategoryPress(item._id)}
-        activeOpacity={0.7}
-      >
-        <Text style={[styles.categoryIcon, isLandscape && styles.categoryIconLandscape]}>
-          {icon}
-        </Text>
-        <Text style={styles.categoryTitle}>{item.title}</Text>
+        activeOpacity={0.7}>
+        <Icon
+          as={IconComponent}
+          size={isLandscape ? 40 : 48}
+          color={color}
+          className={cn(isLandscape ? 'mb-2' : 'mb-3')}
+        />
+        <Text className="text-center text-md font-semibold text-white">{item.title}</Text>
+        {isCustom && <Text className="mt-1 text-xs text-[#6b7280]">Custom</Text>}
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+    <SafeAreaView className="flex-1 bg-[#0f0f0f]">
+      <View className="flex-row items-center justify-between border-b border-[#1a1a1a] px-5 py-4">
+        <TouchableOpacity className="p-2" onPress={handleBack}>
           <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{child.name}'s Shows</Text>
-        <View style={styles.placeholder} />
+        <Text className="text-xl font-bold text-white">{child.name}'s Shows</Text>
+        <View className="w-10" />
       </View>
 
       {categories.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyEmoji}>📺</Text>
-          <Text style={styles.emptyTitle}>No categories yet</Text>
-          <Text style={styles.emptyText}>
+        <View className="flex-1 items-center justify-center px-10">
+          <Text className="mb-4 text-6xl leading-16">📺</Text>
+          <Text className="mb-3 text-2xl font-bold text-white">No categories yet</Text>
+          <Text className="text-center text-base text-[#999999]">
             Ask your parent to add some video categories for you!
           </Text>
         </View>
@@ -104,115 +99,15 @@ export default function ChildCategoriesScreen() {
           keyExtractor={(item) => item._id}
           numColumns={isLandscape ? 4 : 2}
           key={isLandscape ? 'landscape' : 'portrait'}
-          contentContainerStyle={[
-            styles.categoriesList,
-            isLandscape && styles.categoriesListLandscape,
-          ]}
-          columnWrapperStyle={[
-            styles.categoryRow,
-            isLandscape && styles.categoryRowLandscape,
-          ]}
+          contentContainerStyle={{
+            padding: isLandscape ? 16 : 20,
+          }}
+          columnWrapperStyle={{
+            justifyContent: 'space-between',
+            marginBottom: isLandscape ? 12 : 16,
+          }}
         />
       )}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f0f0f',
-  },
-  centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1a1a1a',
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  placeholder: {
-    width: 40,
-  },
-  categoriesList: {
-    padding: 20,
-  },
-  categoriesListLandscape: {
-    padding: 16,
-  },
-  categoryRow: {
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  categoryRowLandscape: {
-    marginBottom: 12,
-  },
-  categoryCard: {
-    flex: 1,
-    marginHorizontal: 8,
-    aspectRatio: 1.2,
-    backgroundColor: '#1a1a1a',
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  categoryCardLandscape: {
-    aspectRatio: 1.5,
-    padding: 16,
-  },
-  categoryIcon: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  categoryIconLandscape: {
-    fontSize: 40,
-    marginBottom: 8,
-  },
-  categoryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ffffff',
-    textAlign: 'center',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 12,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999999',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#ffffff',
-    marginBottom: 20,
-  },
-});

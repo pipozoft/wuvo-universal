@@ -117,7 +117,7 @@ export default function ProfileSelectionScreen() {
       <View className={cn('items-center', isLandscape ? 'mt-5 mb-5' : 'mt-14 mb-10')}>
         <Logo height={isLandscape ? 40 : 50} />
         <Text
-          className={cn('mt-8 mb-2 font-bold text-white', isLandscape ? 'text-[28px]' : 'text-[32px]')}>
+          className={cn('mb-2 font-bold text-white', isLandscape ? 'text-[24px] mt-4' : 'text-[32px] mt-8')}>
           Who's watching?
         </Text>
       </View>
@@ -147,9 +147,9 @@ export default function ProfileSelectionScreen() {
         />
       )}
 
-      <View className="mt-auto pb-10">
+      <View className="mt-auto">
         <Button variant="link" size="sm" onPress={handleSignOut}>
-          <Text>Sign Out</Text>
+          <Text className="text-white">Sign Out</Text>
         </Button>
       </View>
     </View>
