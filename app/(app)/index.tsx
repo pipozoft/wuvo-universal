@@ -2,7 +2,7 @@ import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useUser, useClerk } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   FlatList,
@@ -11,10 +11,11 @@ import {
   ActivityIndicator,
   useWindowDimensions,
   StyleSheet,
+  Alert,
+  Text,
 } from 'react-native';
-import { Text } from '@/components/ui/text';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { Logo } from '@/components/brand/Logo';
 import { User } from 'lucide-react-native';
 import { getAvatarAsset } from '@/lib/avatar';
@@ -36,8 +37,20 @@ export default function ProfileSelectionScreen() {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    router.replace('/sign-in');
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          await signOut();
+          router.replace('/sign-in');
+        },
+      },
+    ]);
   };
 
   if (children === undefined) {
@@ -50,31 +63,93 @@ export default function ProfileSelectionScreen() {
     );
   }
 
-  const renderProfile = ({ item }: { item: any }) => {
-    const isSelected = selectedChild === item._id;
-    const avatarSize = isLandscape ? 80 : 100;
-    const cardWidth = isLandscape ? 120 : 140;
-    const avatarAsset = getAvatarAsset(item.avatar);
-
+  const renderProfile = ({ item, index }: { item: any; index: number }) => {
     return (
-      <TouchableOpacity
-        className={cn(
-          'items-center rounded-2xl bg-[#1a1a1a] p-4',
-          isSelected && 'scale-95 bg-[#2a2a2a]'
-        )}
-        style={{ width: cardWidth }}
+      <ProfileCard
+        item={item}
+        index={index}
+        isLandscape={isLandscape}
         onPress={() => handleProfilePress(item._id)}
-        activeOpacity={0.7}>
+      />
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={children}
+        renderItem={renderProfile}
+        keyExtractor={(item) => item._id}
+        numColumns={isLandscape ? 4 : 2}
+        key={isLandscape ? 'landscape' : 'portrait'}
+        contentContainerStyle={{
+          paddingVertical: isLandscape ? 20 : 40,
+          paddingHorizontal: 24,
+        }}
+        columnWrapperStyle={{
+          justifyContent: 'center',
+          gap: isLandscape ? 30 : 20,
+          marginBottom: isLandscape ? 15 : 20,
+        }}
+        ListHeaderComponent={
+          <Animated.View entering={FadeIn.duration(600)} style={styles.headerContainer}>
+            <Logo height={isLandscape ? 50 : 60} />
+            <Text style={isLandscape ? styles.titleLandscape : styles.titlePortrait}>
+              Who is watching?
+            </Text>
+          </Animated.View>
+        }
+        ListEmptyComponent={
+          <Animated.View entering={FadeInUp.delay(300).duration(500)} style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No profiles yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Ask your parent to create a profile for you in the parent app.
+            </Text>
+          </Animated.View>
+        }
+        ListFooterComponent={
+          <Animated.View entering={FadeIn.delay(800)} style={styles.signOutContainer}>
+            <Button variant="link" size="sm" onPress={handleSignOut}>
+              <Text style={{ color: '#ffffff' }}>Sign Out</Text>
+            </Button>
+          </Animated.View>
+        }
+      />
+    </SafeAreaView>
+  );
+}
+
+function ProfileCard({
+  item,
+  index,
+  isLandscape,
+  onPress,
+}: {
+  item: any;
+  index: number;
+  isLandscape: boolean;
+  onPress: () => void;
+}) {
+  const avatarSize = isLandscape ? 80 : 100;
+  const cardWidth = isLandscape ? 120 : 140;
+  const avatarAsset = getAvatarAsset(item.avatar);
+
+  return (
+    <Animated.View
+      entering={FadeInUp.delay(index * 100).duration(400)}
+      style={{ width: cardWidth }}>
+      <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
         <View
-          className="mb-3 items-center justify-center overflow-hidden"
-          style={{
-            width: avatarSize,
-            height: avatarSize,
-            borderRadius: avatarSize / 2,
-            backgroundColor: avatarAsset ? 'transparent' : '#2a2a2a',
-            borderWidth: 3,
-            borderColor: avatarAsset ? '#322DE2' : '#444444',
-          }}>
+          style={[
+            styles.avatarContainer,
+            {
+              width: avatarSize,
+              height: avatarSize,
+              borderRadius: avatarSize / 2,
+              backgroundColor: avatarAsset ? 'transparent' : '#2a2a2a',
+              borderColor: avatarAsset ? '#322DE2' : '#444444',
+            },
+          ]}>
           {avatarAsset ? (
             <Image
               source={avatarAsset}
@@ -88,61 +163,77 @@ export default function ProfileSelectionScreen() {
             <User size={avatarSize * 0.5} color="#999999" />
           )}
         </View>
-        <Text className="text-center text-base font-semibold text-white">{item.name}</Text>
+        <Text style={styles.cardText}>{item.name}</Text>
       </TouchableOpacity>
-    );
-  };
-
-  return (
-    <View className="flex-1 bg-[#0f0f0f] p-6">
-      <View className={cn('items-center', isLandscape ? 'mt-5 mb-5' : 'mt-14 mb-10')}>
-        <Logo height={isLandscape ? 40 : 50} />
-        <Text
-          className={cn(
-            'mb-2 font-bold text-white',
-            isLandscape ? 'mt-4 text-[24px]' : 'mt-8 text-[32px]'
-          )}>
-          Who's watching?
-        </Text>
-      </View>
-
-      {children.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-10">
-          <Text className="mb-3 text-2xl font-bold text-white">No profiles yet</Text>
-          <Text className="text-center text-base leading-6 text-[#999999]">
-            Ask your parent to create a profile for you in the parent app.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={children}
-          renderItem={renderProfile}
-          keyExtractor={(item) => item._id}
-          numColumns={isLandscape ? 4 : 2}
-          key={isLandscape ? 'landscape' : 'portrait'}
-          contentContainerStyle={{
-            paddingVertical: isLandscape ? 10 : 20,
-          }}
-          columnWrapperStyle={{
-            justifyContent: 'center',
-            gap: isLandscape ? 30 : 20,
-            marginBottom: isLandscape ? 15 : 20,
-          }}
-        />
-      )}
-
-      <View className="mt-auto">
-        <Button variant="link" size="sm" onPress={handleSignOut}>
-          <Text className="text-white">Sign Out</Text>
-        </Button>
-      </View>
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#0f0f0f',
+  },
+  headerContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 30,
+  },
+  titlePortrait: {
+    marginTop: 40,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    lineHeight: 40,
+  },
+  titleLandscape: {
+    marginTop: 24,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    lineHeight: 36,
+  },
+  card: {
+    alignItems: 'center',
+    borderRadius: 16,
+    backgroundColor: '#1a1a1a',
+    padding: 16,
+  },
+  avatarContainer: {
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderWidth: 3,
+  },
+  cardText: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+  emptyTitle: {
+    marginBottom: 12,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  emptySubtitle: {
+    textAlign: 'center',
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#999999',
+  },
+  signOutContainer: {
+    marginTop: 40,
+    marginBottom: 20,
   },
   loadingState: {
     flex: 1,

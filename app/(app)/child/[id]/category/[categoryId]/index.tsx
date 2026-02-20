@@ -1,6 +1,7 @@
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLocalSearchParams, router } from 'expo-router';
+import React from 'react';
 import {
   Text,
   View,
@@ -12,9 +13,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Play, User } from 'lucide-react-native';
-import { cn } from '@/lib/utils';
 import { getIconByName, getCategoryColor } from '@/lib/category-icons';
 import { Icon } from '@/components/ui/icon';
 import { getAvatarAsset } from '@/lib/avatar';
@@ -42,17 +43,17 @@ export default function CategoryVideosScreen() {
   if (child === undefined || category === undefined || videos === undefined) {
     return (
       <SafeAreaView style={styles.container}>
-              <View style={styles.loadingState}>
-                <ActivityIndicator size="large" color="#322DE2" />
-              </View>
-            </SafeAreaView>
+        <View style={styles.loadingState}>
+          <ActivityIndicator size="large" color="#322DE2" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (!category) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text className="mb-5 text-lg text-white">Category not found</Text>
+        <Text style={styles.errorText}>Category not found</Text>
         <Button onPress={handleBack}>Go Back</Button>
       </SafeAreaView>
     );
@@ -63,43 +64,29 @@ export default function CategoryVideosScreen() {
   const avatarAsset = child ? getAvatarAsset(child.avatar) : null;
   const avatarSize = 28;
 
-  const renderVideo = ({ item }: { item: any }) => {
+  const renderVideo = ({ item, index }: { item: any; index: number }) => {
     return (
-      <TouchableOpacity
-        className="active:opacity-70"
-        style={{ width: videoWidth }}
+      <VideoCard
+        item={item}
+        index={index}
+        videoWidth={videoWidth}
+        videoHeight={videoHeight}
+        isLandscape={isLandscape}
         onPress={() => handleVideoPress(item._id)}
-        activeOpacity={0.7}>
-        <View
-          className="relative overflow-hidden rounded-xl bg-[#1a1a1a]"
-          style={{ width: videoWidth, height: videoHeight }}>
-          <Image source={{ uri: item.thumbnail }} className="h-full w-full" />
-          <View className="absolute inset-0 items-center justify-center bg-black/40">
-            <Play size={isLandscape ? 24 : 32} color="#ffffff" fill="#ffffff" />
-          </View>
-        </View>
-        <Text
-          className={cn(
-            'mt-2 font-medium text-white',
-            isLandscape ? 'mt-1.5 text-xs leading-4' : 'text-sm leading-5'
-          )}
-          numberOfLines={2}>
-          {item.title}
-        </Text>
-      </TouchableOpacity>
+      />
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
         <TouchableOpacity className="p-2" onPress={handleBack}>
           <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
           <View className="flex-row items-center gap-2">
             <Icon as={CategoryIcon} size={20} color={categoryColor} />
-            <Text className="text-sm font-bold text-white">{category.title}</Text>
+            <Text style={styles.headerTitle}>{category.title}</Text>
           </View>
           <View className="mt-1 flex-row items-center gap-2">
             {avatarAsset && (
@@ -117,20 +104,20 @@ export default function CategoryVideosScreen() {
                 />
               </View>
             )}
-            <Text className="text-sm text-[#999999]">{child?.name}'s Videos</Text>
+            <Text style={styles.headerSubtitle}>{child?.name}'s Videos</Text>
           </View>
         </View>
         <View className="w-10" />
-      </View>
+      </Animated.View>
 
       {videos.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text className="mb-4 text-6xl">🎬</Text>
-          <Text className="mb-3 text-2xl font-bold text-white">No videos yet</Text>
-          <Text className="px-10 text-center text-base text-[#999999]">
+        <Animated.View entering={FadeInUp.delay(200).duration(500)} style={styles.emptyState}>
+          <Text style={styles.emptyEmoji}>🎬</Text>
+          <Text style={styles.emptyTitle}>No videos yet</Text>
+          <Text style={styles.emptySubtitle}>
             Ask your parent to add some videos to this category!
           </Text>
-        </View>
+        </Animated.View>
       ) : (
         <FlatList
           data={videos}
@@ -153,6 +140,62 @@ export default function CategoryVideosScreen() {
   );
 }
 
+function VideoCard({
+  item,
+  index,
+  videoWidth,
+  videoHeight,
+  isLandscape,
+  onPress,
+}: {
+  item: any;
+  index: number;
+  videoWidth: number;
+  videoHeight: number;
+  isLandscape: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Animated.View
+      entering={FadeInUp.delay(index * 60).duration(400)}
+      style={{ width: videoWidth }}>
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+        <View
+          style={{
+            width: videoWidth,
+            height: videoHeight,
+            borderRadius: 12,
+            backgroundColor: '#1a1a1a',
+            overflow: 'hidden',
+          }}>
+          <Image source={{ uri: item.thumbnail }} style={{ width: '100%', height: '100%' }} />
+          <View
+            style={{
+              position: 'absolute',
+              inset: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            }}>
+            <Play size={isLandscape ? 24 : 32} color="#ffffff" fill="#ffffff" />
+          </View>
+        </View>
+        <Text
+          style={{
+            marginTop: isLandscape ? 6 : 8,
+            fontWeight: '500',
+            color: '#ffffff',
+            fontSize: isLandscape ? 12 : 14,
+            lineHeight: isLandscape ? 16 : 20,
+          }}
+          numberOfLines={2}>
+          {item.title}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -167,10 +210,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
+  headerTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#999999',
+  },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 12,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#999999',
     paddingHorizontal: 40,
   },
   list: {
@@ -180,5 +248,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#ffffff',
+    marginBottom: 20,
   },
 });

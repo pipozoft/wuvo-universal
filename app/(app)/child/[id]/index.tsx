@@ -1,6 +1,7 @@
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLocalSearchParams, router } from 'expo-router';
+import React from 'react';
 import {
   View,
   FlatList,
@@ -9,14 +10,14 @@ import {
   useWindowDimensions,
   Image,
   StyleSheet,
+  Text,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User } from 'lucide-react-native';
-import { cn } from '@/lib/utils';
 import { getIconByName, getCategoryColor, isCustomCategory } from '@/lib/category-icons';
 import { Icon } from '@/components/ui/icon';
-import { Text } from '@/components/ui/text';
 import { getAvatarAsset } from '@/lib/avatar';
 
 export default function ChildCategoriesScreen() {
@@ -47,7 +48,7 @@ export default function ChildCategoriesScreen() {
   if (!child) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text className="mb-5 text-lg text-white">Profile not found</Text>
+        <Text style={styles.errorText}>Profile not found</Text>
         <Button onPress={handleBack}>Go Back</Button>
       </SafeAreaView>
     );
@@ -56,35 +57,20 @@ export default function ChildCategoriesScreen() {
   const avatarAsset = getAvatarAsset(child.avatar);
   const avatarSize = 40;
 
-  const renderCategory = ({ item }: { item: any }) => {
-    const IconComponent = getIconByName(item.icon);
-    const color = getCategoryColor(item);
-    const isCustom = isCustomCategory(item);
-
+  const renderCategory = ({ item, index }: { item: any; index: number }) => {
     return (
-      <TouchableOpacity
-        className={cn(
-          'mx-2 flex-1 items-center justify-center gap-3 rounded-2xl bg-[#1a1a1a]',
-          isLandscape ? 'aspect-[1.5] p-4' : 'aspect-[1.2] p-5'
-        )}
-        style={{ borderColor: color, borderWidth: 2 }}
+      <CategoryCard
+        item={item}
+        index={index}
+        isLandscape={isLandscape}
         onPress={() => handleCategoryPress(item._id)}
-        activeOpacity={0.7}>
-        <Icon
-          as={IconComponent}
-          size={isLandscape ? 40 : 48}
-          color={color}
-          className={cn(isLandscape ? 'mb-2' : 'mb-3')}
-        />
-        <Text className="text-md text-center font-semibold text-white">{item.title}</Text>
-        {/* {isCustom && <Text className="mt-1 text-xs text-[#6b7280]">Custom</Text>} */}
-      </TouchableOpacity>
+      />
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
         <TouchableOpacity className="p-2" onPress={handleBack}>
           <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
@@ -106,19 +92,19 @@ export default function ChildCategoriesScreen() {
               <User size={avatarSize * 0.5} color="#999999" />
             )}
           </View>
-          <Text className="text-xl font-bold text-white">{child.name}'s Library</Text>
+          <Text style={styles.headerTitle}>{child.name}'s Library</Text>
         </View>
         <View className="w-10" />
-      </View>
+      </Animated.View>
 
       {categories.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text className="mb-4 text-6xl leading-16">📺</Text>
-          <Text className="mb-3 text-2xl font-bold text-white">No categories yet</Text>
-          <Text className="px-10 text-center text-base text-[#999999]">
+        <Animated.View entering={FadeInUp.delay(200).duration(500)} style={styles.emptyState}>
+          <Text style={styles.emptyEmoji}>📺</Text>
+          <Text style={styles.emptyTitle}>No categories yet</Text>
+          <Text style={styles.emptySubtitle}>
             Ask your parent to add some video categories for you!
           </Text>
-        </View>
+        </Animated.View>
       ) : (
         <FlatList
           data={categories}
@@ -140,9 +126,53 @@ export default function ChildCategoriesScreen() {
   );
 }
 
+function CategoryCard({
+  item,
+  index,
+  isLandscape,
+  onPress,
+}: {
+  item: any;
+  index: number;
+  isLandscape: boolean;
+  onPress: () => void;
+}) {
+  const IconComponent = getIconByName(item.icon);
+  const color = getCategoryColor(item);
+
+  return (
+    <Animated.View
+      entering={FadeInUp.delay(index * 80).duration(400)}
+      style={{
+        marginHorizontal: 8,
+        flex: 1,
+      }}>
+      <TouchableOpacity
+        style={[
+          {
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            borderRadius: 16,
+            backgroundColor: '#1a1a1a',
+            borderWidth: 2,
+            borderColor: color,
+          },
+          isLandscape ? { aspectRatio: 1.5, padding: 16 } : { aspectRatio: 1.2, padding: 20 },
+        ]}
+        onPress={onPress}
+        activeOpacity={0.7}>
+        <Icon as={IconComponent} size={isLandscape ? 40 : 48} color={color} />
+        <Text style={styles.cardText}>{item.title}</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#0f0f0f',
   },
   header: {
     flexDirection: 'row',
@@ -153,11 +183,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
+  },
+  emptyEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 12,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#999999',
+    paddingHorizontal: 40,
+  },
+  cardText: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
   },
   list: {
     flex: 1,
@@ -166,5 +223,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#ffffff',
+    marginBottom: 20,
+  },
 });
