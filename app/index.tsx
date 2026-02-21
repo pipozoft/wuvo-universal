@@ -15,6 +15,7 @@ import {
   Text,
 } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/brand/Logo';
 import { User } from 'lucide-react-native';
@@ -109,7 +110,7 @@ export default function ProfileSelectionScreen() {
         }
         ListFooterComponent={
           <Animated.View entering={FadeIn.delay(800)} style={styles.signOutContainer}>
-            <Button variant="link" size="sm" onPress={handleSignOut}>
+            <Button variant="ghost" size="sm" onPress={handleSignOut}>
               <Text style={{ color: '#ffffff' }}>Sign Out</Text>
             </Button>
           </Animated.View>
@@ -133,12 +134,23 @@ function ProfileCard({
   const avatarSize = isLandscape ? 80 : 100;
   const cardWidth = isLandscape ? 120 : 140;
   const avatarAsset = getAvatarAsset(item.avatar);
+  const accentColor = '#322DE2';
+  const gradientColor = accentColor + '40';
+  const highlightColor = accentColor + '60';
 
   return (
     <Animated.View
       entering={FadeInUp.delay(index * 100).duration(400)}
       style={{ width: cardWidth }}>
       <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+        <LinearGradient
+          colors={['transparent', gradientColor]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+        <View style={[styles.cardBorderHighlight, { borderColor: highlightColor }]} />
+        <View style={[styles.cardInnerGlow, { shadowColor: accentColor }]} />
         <View
           style={[
             styles.avatarContainer,
@@ -147,7 +159,7 @@ function ProfileCard({
               height: avatarSize,
               borderRadius: avatarSize / 2,
               backgroundColor: avatarAsset ? 'transparent' : '#2a2a2a',
-              borderColor: avatarAsset ? '#322DE2' : '#444444',
+              borderColor: accentColor,
             },
           ]}>
           {avatarAsset ? (
@@ -196,15 +208,39 @@ const styles = StyleSheet.create({
   card: {
     alignItems: 'center',
     borderRadius: 16,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'rgba(26, 26, 26, 0.6)',
+    borderWidth: 0,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     padding: 16,
+    overflow: 'hidden',
+  },
+  cardBorderHighlight: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
+    borderWidth: 1.5,
+  },
+  cardInnerGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 8,
   },
   avatarContainer: {
     marginBottom: 12,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    borderWidth: 3,
+    borderWidth: 1,
   },
   cardText: {
     textAlign: 'center',

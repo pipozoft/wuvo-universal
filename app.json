@@ -3,7 +3,7 @@
     "name": "wuvo",
     "slug": "wuvo",
     "version": "1.0.0",
-    "orientation": "default",
+    "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "wuvo",
     "userInterfaceStyle": "automatic",

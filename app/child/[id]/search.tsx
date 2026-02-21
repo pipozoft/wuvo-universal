@@ -6,14 +6,14 @@ import {
   View,
   FlatList,
   TouchableOpacity,
-  Image,
   useWindowDimensions,
   StyleSheet,
   Text,
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, X, Play, ArrowLeft } from 'lucide-react-native';
+import { Search, X, ArrowLeft } from 'lucide-react-native';
+import { VideoCard } from '@/components/VideoCard';
 
 export default function SearchScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -91,67 +91,18 @@ export default function SearchScreen() {
             marginBottom: isLandscape ? 12 : 16,
             gap: isLandscape ? 12 : 16,
           }}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <VideoCard
               item={item}
+              index={index}
               isLandscape={isLandscape}
+              numColumns={numColumns}
               onPress={() => handleVideoPress(item._id)}
             />
           )}
         />
       )}
     </SafeAreaView>
-  );
-}
-
-function VideoCard({
-  item,
-  isLandscape,
-  onPress,
-}: {
-  item: any;
-  isLandscape: boolean;
-  onPress: () => void;
-}) {
-  const { width } = useWindowDimensions();
-  const numColumns = isLandscape ? 3 : 2;
-  const videoWidth = (width - 48) / numColumns - 12;
-  const videoHeight = videoWidth * 0.75;
-
-  return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={{ width: videoWidth }}>
-      <View
-        style={{
-          width: videoWidth,
-          height: videoHeight,
-          borderRadius: 12,
-          backgroundColor: '#1a1a1a',
-          overflow: 'hidden',
-        }}>
-        <Image source={{ uri: item.thumbnail }} style={{ width: '100%', height: '100%' }} />
-        <View
-          style={{
-            position: 'absolute',
-            inset: 0,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          }}>
-          <Play size={isLandscape ? 24 : 32} color="#ffffff" fill="#ffffff" />
-        </View>
-      </View>
-      <Text
-        style={{
-          marginTop: 8,
-          fontWeight: '500',
-          color: '#ffffff',
-          fontSize: 14,
-          lineHeight: 20,
-        }}
-        numberOfLines={2}>
-        {item.title}
-      </Text>
-    </TouchableOpacity>
   );
 }
 

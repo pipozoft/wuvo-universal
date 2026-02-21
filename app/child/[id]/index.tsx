@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '@/components/ui/button';
 import { User, Search } from 'lucide-react-native';
 import { getIconByName, getCategoryColor } from '@/lib/category-icons';
@@ -170,6 +171,10 @@ function ProfileSwitcherModal({
   onSwitchProfile: (childId: string) => void;
   onExitToHome: () => void;
 }) {
+  const accentColor = '#322DE2';
+  const gradientColor = accentColor + '40';
+  const highlightColor = accentColor + '60';
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.modalOverlay} onPress={onClose}>
@@ -188,11 +193,31 @@ function ProfileSwitcherModal({
                   onPress={() => onSwitchProfile(item._id)}
                   disabled={isCurrentProfile}
                   activeOpacity={0.7}>
+                  <LinearGradient
+                    colors={['transparent', gradientColor]}
+                    style={StyleSheet.absoluteFill}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  />
+                  <View
+                    style={[
+                      styles.profileItemBorder,
+                      {
+                        borderColor: isCurrentProfile ? highlightColor : 'rgba(255, 255, 255, 0.1)',
+                      },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.profileItemGlow,
+                      isCurrentProfile && { shadowColor: accentColor, shadowOpacity: 0.5 },
+                    ]}
+                  />
                   <View
                     style={[
                       styles.profileAvatar,
                       {
-                        borderColor: isCurrentProfile ? '#322DE2' : '#444444',
+                        borderColor: isCurrentProfile ? accentColor : '#444444',
                         backgroundColor: avatarAsset ? 'transparent' : '#2a2a2a',
                       },
                     ]}>
@@ -237,6 +262,9 @@ function CategoryCard({
   const IconComponent = getIconByName(item.icon);
   const color = getCategoryColor(item);
 
+  const gradientColor = color + '40';
+  const highlightColor = color + '60';
+
   return (
     <Animated.View
       entering={FadeInUp.delay(index * 80).duration(400)}
@@ -246,19 +274,19 @@ function CategoryCard({
       }}>
       <TouchableOpacity
         style={[
-          {
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            borderRadius: 16,
-            backgroundColor: '#1a1a1a',
-            borderWidth: 2,
-            borderColor: color,
-          },
+          styles.categoryCard,
           isLandscape ? { aspectRatio: 1.5, padding: 16 } : { aspectRatio: 1.2, padding: 20 },
         ]}
         onPress={onPress}
         activeOpacity={0.7}>
+        <LinearGradient
+          colors={['transparent', gradientColor]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+        <View style={[styles.cardBorderHighlight, { borderColor: highlightColor }]} />
+        <View style={[styles.cardInnerGlow, { shadowColor: color }]} />
         <Icon as={IconComponent} size={isLandscape ? 40 : 48} color={color} />
         <Text style={styles.cardText}>{item.title}</Text>
       </TouchableOpacity>
@@ -315,6 +343,38 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#ffffff',
   },
+  categoryCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    borderRadius: 16,
+    backgroundColor: 'rgba(26, 26, 26, 0.6)',
+    borderWidth: 0,
+    overflow: 'hidden',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+  },
+  cardBorderHighlight: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
+    borderWidth: 1,
+    opacity: 0.6,
+  },
+  cardInnerGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 8,
+  },
   list: {
     flex: 1,
   },
@@ -359,11 +419,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 12,
-    backgroundColor: '#2a2a2a',
+    borderWidth: 0,
     minWidth: 80,
+    overflow: 'hidden',
   },
   profileItemActive: {
-    backgroundColor: '#322DE2',
+    backgroundColor: 'rgba(50, 45, 226, 0.4)',
+  },
+  profileItemBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  profileItemGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 10,
+    elevation: 4,
   },
   profileAvatar: {
     width: 48,
@@ -371,7 +453,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     marginBottom: 8,
     overflow: 'hidden',
   },
@@ -388,6 +470,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     backgroundColor: '#2a2a2a',
+  },
+  exitButtonBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    borderWidth: 1.5,
   },
   exitButtonText: {
     fontSize: 16,

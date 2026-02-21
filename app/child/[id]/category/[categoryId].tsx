@@ -16,10 +16,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Play, User, Search, X } from 'lucide-react-native';
+import { ArrowLeft, Search, X } from 'lucide-react-native';
 import { getIconByName, getCategoryColor } from '@/lib/category-icons';
 import { Icon } from '@/components/ui/icon';
 import { getAvatarAsset } from '@/lib/avatar';
+import { VideoCard } from '@/components/VideoCard';
 
 export default function CategoryVideosScreen() {
   const { id, categoryId } = useLocalSearchParams<{ id: string; categoryId: string }>();
@@ -31,11 +32,9 @@ export default function CategoryVideosScreen() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const numColumns = isLandscape ? 3 : 2;
-  const videoWidth = (width - (isLandscape ? 48 : 16) * (numColumns + 1)) / numColumns;
-  const videoHeight = videoWidth * 0.75;
 
   const handleVideoPress = (videoId: string) => {
-    router.replace(`/child/${id}/video/${videoId}`);
+    router.push(`/child/${id}/video/${videoId}`);
   };
 
   const handleBack = () => {
@@ -74,18 +73,15 @@ export default function CategoryVideosScreen() {
   const avatarAsset = child ? getAvatarAsset(child.avatar) : null;
   const avatarSize = 28;
 
-  const renderVideo = ({ item, index }: { item: any; index: number }) => {
-    return (
-      <VideoCard
-        item={item}
-        index={index}
-        videoWidth={videoWidth}
-        videoHeight={videoHeight}
-        isLandscape={isLandscape}
-        onPress={() => handleVideoPress(item._id)}
-      />
-    );
-  };
+  const renderVideo = ({ item, index }: { item: any; index: number }) => (
+    <VideoCard
+      item={item}
+      index={index}
+      isLandscape={isLandscape}
+      numColumns={numColumns}
+      onPress={() => handleVideoPress(item._id)}
+    />
+  );
 
   const showNoResults = searchQuery.trim() && filteredVideos.length === 0;
 
@@ -173,62 +169,6 @@ export default function CategoryVideosScreen() {
         />
       )}
     </SafeAreaView>
-  );
-}
-
-function VideoCard({
-  item,
-  index,
-  videoWidth,
-  videoHeight,
-  isLandscape,
-  onPress,
-}: {
-  item: any;
-  index: number;
-  videoWidth: number;
-  videoHeight: number;
-  isLandscape: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Animated.View
-      entering={FadeInUp.delay(index * 60).duration(400)}
-      style={{ width: videoWidth }}>
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-        <View
-          style={{
-            width: videoWidth,
-            height: videoHeight,
-            borderRadius: 12,
-            backgroundColor: '#1a1a1a',
-            overflow: 'hidden',
-          }}>
-          <Image source={{ uri: item.thumbnail }} style={{ width: '100%', height: '100%' }} />
-          <View
-            style={{
-              position: 'absolute',
-              inset: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            }}>
-            <Play size={isLandscape ? 24 : 32} color="#ffffff" fill="#ffffff" />
-          </View>
-        </View>
-        <Text
-          style={{
-            marginTop: isLandscape ? 6 : 8,
-            fontWeight: '500',
-            color: '#ffffff',
-            fontSize: isLandscape ? 12 : 14,
-            lineHeight: isLandscape ? 16 : 20,
-          }}
-          numberOfLines={2}>
-          {item.title}
-        </Text>
-      </TouchableOpacity>
-    </Animated.View>
   );
 }
 
