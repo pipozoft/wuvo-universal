@@ -185,7 +185,6 @@ export default function SignInScreen() {
     setErrors([]);
   };
 
-  // iOS uses 'padding', Android works best with ScrollView only
   const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : undefined;
 
   if (needsSecondFactor) {
@@ -341,13 +340,13 @@ export default function SignInScreen() {
             </Button>
 
             <View className="flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/(auth)/terms" asChild>
+              <Link href="/terms" asChild>
                 <Button variant="link" size="sm" disabled={isLoading}>
                   <Text className="text-muted-foreground text-xs">Terms of Service</Text>
                 </Button>
               </Link>
               <Text className="text-muted-foreground text-xs">|</Text>
-              <Link href="/(auth)/privacy" asChild>
+              <Link href="/privacy" asChild>
                 <Button variant="link" size="sm" disabled={isLoading}>
                   <Text className="text-muted-foreground text-xs">Privacy Policy</Text>
                 </Button>

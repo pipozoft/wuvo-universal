@@ -32,7 +32,7 @@ export default function ProfileSelectionScreen() {
   const handleProfilePress = (childId: string) => {
     setSelectedChild(childId);
     setTimeout(() => {
-      router.push(`/child/${childId}`);
+      router.replace(`/child/${childId}`);
     }, 150);
   };
 

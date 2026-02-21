@@ -1,7 +1,7 @@
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLocalSearchParams, router } from 'expo-router';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Text,
   View,
@@ -15,7 +15,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Play, User } from 'lucide-react-native';
+import { Input } from '@/components/ui/input';
+import { ArrowLeft, Play, User, Search, X } from 'lucide-react-native';
 import { getIconByName, getCategoryColor } from '@/lib/category-icons';
 import { Icon } from '@/components/ui/icon';
 import { getAvatarAsset } from '@/lib/avatar';
@@ -27,18 +28,27 @@ export default function CategoryVideosScreen() {
   const videos = useQuery(api.videos.listVideosByCategory, { categoryId: categoryId as any });
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const [searchQuery, setSearchQuery] = useState('');
 
   const numColumns = isLandscape ? 3 : 2;
   const videoWidth = (width - (isLandscape ? 48 : 16) * (numColumns + 1)) / numColumns;
   const videoHeight = videoWidth * 0.75;
 
   const handleVideoPress = (videoId: string) => {
-    router.push(`/child/${id}/video/${videoId}`);
+    router.replace(`/child/${id}/video/${videoId}`);
   };
 
   const handleBack = () => {
     router.back();
   };
+
+  const filteredVideos = useMemo(() => {
+    if (!videos) return [];
+    if (!searchQuery.trim()) return videos;
+
+    const query = searchQuery.toLowerCase().trim();
+    return videos.filter((video: any) => video.title.toLowerCase().includes(query));
+  }, [videos, searchQuery]);
 
   if (child === undefined || category === undefined || videos === undefined) {
     return (
@@ -77,6 +87,8 @@ export default function CategoryVideosScreen() {
     );
   };
 
+  const showNoResults = searchQuery.trim() && filteredVideos.length === 0;
+
   return (
     <SafeAreaView style={styles.container}>
       <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
@@ -110,6 +122,24 @@ export default function CategoryVideosScreen() {
         <View className="w-10" />
       </Animated.View>
 
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputContainer}>
+          <Search size={20} color="#999999" style={styles.searchIcon} />
+          <Input
+            placeholder="Search videos..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.searchInput}
+            placeholderTextColor="#666666"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+              <X size={18} color="#999999" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
       {videos.length === 0 ? (
         <Animated.View entering={FadeInUp.delay(200).duration(500)} style={styles.emptyState}>
           <Text style={styles.emptyEmoji}>🎬</Text>
@@ -118,9 +148,15 @@ export default function CategoryVideosScreen() {
             Ask your parent to add some videos to this category!
           </Text>
         </Animated.View>
+      ) : showNoResults ? (
+        <Animated.View entering={FadeInUp.duration(400)} style={styles.noResultsState}>
+          <Search size={48} color="#666666" />
+          <Text style={styles.noResultsTitle}>No videos found</Text>
+          <Text style={styles.noResultsSubtitle}>Try a different search term</Text>
+        </Animated.View>
       ) : (
         <FlatList
-          data={videos}
+          data={filteredVideos}
           renderItem={renderVideo}
           keyExtractor={(item) => item._id}
           numColumns={numColumns}
@@ -219,6 +255,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999999',
   },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a1a1a',
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    color: '#ffffff',
+    paddingHorizontal: 0,
+    height: 44,
+  },
+  clearButton: {
+    padding: 4,
+  },
   emptyState: {
     flex: 1,
     alignItems: 'center',
@@ -240,6 +305,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#999999',
     paddingHorizontal: 40,
+  },
+  noResultsState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  noResultsTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  noResultsSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666666',
   },
   list: {
     flex: 1,

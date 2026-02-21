@@ -73,20 +73,6 @@ export default function VideoPlayerScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar hidden />
 
-      {/* {!isLandscape && (
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.headerButton} onPress={handleBack}>
-            <ArrowLeft size={28} color="#ffffff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {video.title}
-          </Text>
-          <TouchableOpacity style={styles.headerButton} onPress={handleBack}>
-            <X size={28} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
-      )} */}
-
       <View style={styles.videoContainer}>
         {isLoading && (
           <View style={styles.loadingOverlay}>
@@ -143,28 +129,24 @@ export default function VideoPlayerScreen() {
             />
             {alreadyOpened && (
               <View style={styles.alreadyOpenedContent}>
-                <TouchableOpacity style={{
-                  flex: 1,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  height: '100%',
-                  gap: 12,
-                }} onPress={handleBack}>
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                    gap: 12,
+                  }}
+                  onPress={handleBack}>
                   <ArrowLeft size={28} color="#ffffff" />
-                  <Text className="text-muted-foreground">Tap anywhere to go back</Text>
+                  <Text className="text-muted-foreground">Tap to close</Text>
                 </TouchableOpacity>
               </View>
             )}
           </>
         )}
       </View>
-
-      {/* {isLandscape && (
-        <TouchableOpacity style={styles.landscapeBackButton} onPress={handleBack}>
-          <X size={24} color="#ffffff" />
-        </TouchableOpacity>
-      )} */}
     </SafeAreaView>
   );
 }
