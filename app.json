@@ -37,6 +37,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "37e1458e-0dc3-44cd-b430-f89d05bb1cfb"
+      }
+    },
+    "owner": "pipozoft"
   }
 }
